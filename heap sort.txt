@@ -1,0 +1,78 @@
+heap sort
+
+#include <stdio.h>
+
+int heap[100];
+int size = 0;
+
+void swap(int *a, int *b) {
+    int temp = *a;
+    *a = *b;
+    *b = temp;
+}
+
+void heapUp(int index) {
+    int parent = (index - 1) / 2;
+    if (index > 0 && heap[parent] > heap[index]) {
+        swap(&heap[parent], &heap[index]);
+        heapUp(parent);
+    }
+}
+
+void insert(int value) {
+    heap[size] = value;
+    heapUp(size);
+    size++;
+}
+
+void heapDown(int index) {
+    int left = 2 * index + 1;
+    int right = 2 * index + 2;
+    int smallest = index;
+
+    if (left < size && heap[left] < heap[smallest])
+        smallest = left;
+
+    if (right < size && heap[right] < heap[smallest])
+        smallest = right;
+
+    if (smallest != index) {
+        swap(&heap[index], &heap[smallest]);
+        heapDown(smallest);
+    }
+}
+
+int deleteMin() {
+    int min = heap[0];
+    heap[0] = heap[size - 1];
+    size--;
+    heapDown(0);
+    return min;
+}
+
+int main() {
+    int n, i, value;
+    int sorted[100];
+
+    printf("Enter number of elements: ");
+    if (scanf("%d", &n) != 1) return 1;
+
+    printf("Enter %d elements:\n", n);
+    for (i = 0; i < n; i++) {
+        scanf("%d", &value);
+        insert(value);
+    }
+
+    int originalCount = n;
+    for (i = 0; i < originalCount; i++) {
+        sorted[i] = deleteMin();
+    }
+
+    printf("Sorted elements in ascending order:\n");
+    for (i = 0; i < originalCount; i++) {
+        printf("%d ", sorted[i]);
+    }
+    printf("\n");
+
+    return 0;
+}
