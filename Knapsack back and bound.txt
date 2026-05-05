@@ -1,0 +1,129 @@
+Knapsack problem using back and bound
+
+#include <stdio.h>
+#include <stdlib.h>
+
+#define MAX_ITEMS 50
+
+typedef struct {
+    int id;
+    float weight;
+    float value;
+    float ratio;
+} Item;
+
+typedef struct {
+    int level;
+    float profit;
+    float weight;
+    float bound;
+    int path[MAX_ITEMS];
+} Node;
+
+int compareItems(const void *a, const void *b) {
+    Item *i1 = (Item *)a;
+    Item *i2 = (Item *)b;
+    if (i2->ratio > i1->ratio) return 1;
+    if (i2->ratio < i1->ratio) return -1;
+    return 0;
+}
+
+float calculate_bound(Node u, int n, int W, Item items[]) {
+    float profit_bound, total_weight;
+    int j;
+    if (u.weight >= W) return 0;
+    profit_bound = u.profit;
+    j = u.level + 1;
+    total_weight = u.weight;
+    while (j < n && total_weight + items[j].weight <= W) {
+        total_weight += items[j].weight;
+        profit_bound += items[j].value;
+        j++;
+    }
+    if (j < n) profit_bound += (W - total_weight) * items[j].ratio;
+    return profit_bound;
+}
+
+int main() {
+    int n, W, i, j, bestIdx, q_size = 0;
+    float maxProfit = 0;
+    int final_path[MAX_ITEMS] = {0};
+    Item *items;
+    Node *queue;
+    Node u, v;
+
+    printf("Enter number of items: ");
+    scanf("%d", &n);
+
+    items = (Item *)malloc(n * sizeof(Item));
+    queue = (Node *)malloc(1000 * sizeof(Node));
+
+    for (i = 0; i < n; i++) {
+        items[i].id = i + 1;
+        printf("Enter value and weight for item %d: ", i + 1);
+        scanf("%f %f", &items[i].value, &items[i].weight);
+        items[i].ratio = items[i].value / items[i].weight;
+    }
+
+    printf("Enter capacity: ");
+    scanf("%d", &W);
+
+    qsort(items, n, sizeof(Item), compareItems);
+
+    u.level = -1; u.profit = 0; u.weight = 0;
+    for(i=0; i<n; i++) u.path[i] = 0;
+    u.bound = calculate_bound(u, n, W, items);
+    queue[q_size++] = u;
+
+    while (q_size > 0) {
+        bestIdx = 0;
+        for (i = 1; i < q_size; i++)
+            if (queue[i].bound > queue[bestIdx].bound) bestIdx = i;
+
+        u = queue[bestIdx];
+        queue[bestIdx] = queue[--q_size];
+
+        if (u.bound > maxProfit && u.level < n - 1) {
+            v.level = u.level + 1;
+
+            /* --- Case 1: Include Item --- */
+            v.weight = u.weight + items[v.level].weight;
+            v.profit = u.profit + items[v.level].value;
+            for(j=0; j<n; j++) v.path[j] = u.path[j];
+            v.path[v.level] = 1;
+
+            if (v.weight <= W && v.profit > maxProfit) {
+                maxProfit = v.profit;
+                for(j=0; j<n; j++) final_path[j] = v.path[j];
+            }
+            v.bound = calculate_bound(v, n, W, items);
+            if (v.bound > maxProfit) queue[q_size++] = v;
+
+            /* --- Case 2: Exclude Item --- */
+            v.weight = u.weight;
+            v.profit = u.profit;
+            for(j=0; j<n; j++) v.path[j] = u.path[j];
+            v.path[v.level] = 0;
+
+            v.bound = calculate_bound(v, n, W, items);
+            if (v.bound > maxProfit) queue[q_size++] = v;
+        }
+    }
+
+    printf("\n--- Final Result ---\n");
+    printf("Maximum Profit: %.2f\n", maxProfit);
+    printf("Items Included: ");
+    for (i = 0; i < n; i++) {
+        if (final_path[i] == 1) {
+            printf("Item%d ", items[i].id);
+        }
+    }
+    printf("\nSelection Path: ");
+    for (i = 0; i < n; i++) {
+        printf("%d ", final_path[i]);
+    }
+    printf("\n");
+
+    free(items); free(queue);
+    return 0;
+}
