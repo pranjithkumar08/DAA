@@ -1,0 +1,92 @@
+string compare
+
+#include <stdio.h>
+#include <string.h>
+
+int main() {
+    char text[100], pattern[100];
+    int i,j,k;
+    printf("Text: ");
+    scanf("%[^\n]", text);
+    printf("Pattern: ");
+    scanf(" %[^\n]", pattern);
+
+    int n = strlen(text), m = strlen(pattern);
+    printf("\n=== EASY WORD-BY-WORD COMPARE ===\n");
+
+    for(i = 0; i <= n - m; i++) {
+        // Print exactly m characters manually (no %.*s)
+        printf("Step %d: Compare '", i+1);
+        for(k = 0; k < m; k++) {
+            printf("%c", text[i + k]);
+        }
+        printf("' with '%s'\n", pattern);
+
+        int match = 1;
+        for(j = 0; j < m; j++) {
+            if(text[i+j] != pattern[j]) {
+                printf("  Stopped: '%c' != '%c'\n", text[i+j], pattern[j]);
+                match = 0;
+                break;
+            }
+        }
+
+        if(match) {
+            printf("  MATCH FOUND at %d!\n", i);
+            return 0;
+        }
+        printf("\n");
+    }
+
+    printf("No match!\n");
+}
+
+shortest distance	
+
+#include <stdio.h>
+#include <math.h>
+
+float shortestDistance(float x[], float y[], int n) {
+    int i,j;
+    float shortest = 9999;
+    int win1 = 0, win2 = 0;
+
+    printf("\n=== FIND CLOSEST PAIR ===\n");
+
+    for( i = 1; i <= n-1; i++) {
+        for( j = i+1; j <= n; j++) {
+            printf("Check P%d vs P%d: ", i, j);
+            float dist = sqrt(pow(x[i-1]-x[j-1], 2) + pow(y[i-1]-y[j-1], 2));
+            printf("dist=%f ", dist);
+
+            if(dist < shortest) {
+                shortest = dist;
+                win1 = i;
+                win2 = j;
+
+            }
+            printf("\n");
+        }
+    }
+
+    printf("\nP%d & P%d = %f units\n", win1, win2, shortest);
+    return shortest;
+}
+
+int main() {
+
+    int n, i;
+    float x[100], y[100];
+
+    printf("Enter number of points: ");
+    scanf("%d", &n);
+
+    printf("\nEnter coordinates:\n");
+    for(i = 1; i <= n; i++) {
+        printf("P%d: ", i);
+        scanf("%f %f", &x[i-1], &y[i-1]);
+    }
+
+    float ans = shortestDistance(x, y, n);
+    return 0;
+}
